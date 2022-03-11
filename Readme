@@ -1,36 +1,24 @@
-updated on 3-10-2022
+3-10-2022
 
-My current clinic has v16.1 of Eclipse whereas the scripts were built in v15.6 (during my residency). This may cause a bit of a mismatch between the code and what Eclipse requires. Both scripts will run in v16.1
-as they were recompiled with the necessary libraries to run in v16.1. The VMS.TPS libraries have been updated to v16.1. Minimal changes were required for the plug-in script.
-However, the executable binary is now compiled and placed in /ESAPI_MT/VMATTBI_optLoopMT/VMATTBI_optLoopMT/bin/x64/debug instead of /ESAPI_MT/VMATTBI_optLoopMT/VMATTBI_optLoopMT/bin/debug
-You need to modify the .ini configuration file inside the /bin/x64/debug directory for any changes to take effect if your clinic is using v16. 
+Latest release: 
+doseStats_v0.5_beta
 
-I will work to update the scripts using build configurations so it is easy to rebuild the scripts according to the Eclipse version at your clinic.
+The purpose of this script is to improve the efficiency and safety of planning for HDR GYN brachytherapy. The ABS and GEC-ESTRO recommends brachytherapy as an integral part of the
+treatment process from GYN cancer patients. The treatment dose (external beam and brachy) should be evaluated in terms of EQD2 where the ABS recommends an EQD2 of 80-90 Gy be delivered to the
+HRCTV for cervical carcinoma. In the clinics I've worked in, the dose from external beam is assumed to be uniform and equal to the prescription dose whereas the EQD2 is explicitly evaluated for each fraction of brachytherapy.
+Furthermore, the achieved EQD2 for a given fraction is propagated forward for the remaining fractions to see if the ABS recommendations will be met with the given plan quality. If not, adjustments
+are made to the plan and the EQD2 values are updated (rinse and repeat). The EQD2 is typically calculated by entering the DVH doses for the relevant organs (HRCTV, rectum, bladder, etc.) into a spreadsheet.
+As you can imagine, this becomes tedious when multiple adjustments are made to the plan. In addition, this limits the amount of data that can be collected for research purposes (based on the time it takes 
+to enter the data for each requested metric).
 
-Latest code versions:
-Plug-in --> v1.7_beta
-Executable --> v1.2_beta
+This script addresses these issues by automatically retriving the achieved DVH doses for the current and previously treated fractions for user-defined metrics. The achieved doses for the current fraction 
+are propagated forward and the EQD2 values are evaluated and compared against user-defined tolerances. This way, you can immediately see if you are meeting the EQD2 constraints without having to enter the 
+DVH doses into a spreadsheet. Once an optimal plan is achieved, the doses can be written to a spreadsheet for recordkeeping. The retrived metrics can be adjusted in the main GUI.
+In addition, the metrics and the tolerances can be adjusted in a configuration file that is read upon launch. 
 
-Updates to both scripts from v1.5/v1.0 (i.e., pre- 11/12/2021):
--Fixed minor bugs and GUI formatting issues in both codes
--Added code to allow the user to specify default settings in both scripts in a .ini configuration file (see the VMAT_TBI_config.ini example provided with the code)
--Provided additional options in the configuration file that the user can adjust
--Please see Section 7 of the 'VMAT_TBI_guide.pdf' file for more details on how to setup and use the configuration file
+A second dose calculation check is included with the program and uses the point source approximation. In general, the agreement between the planned and calculated doses are within ~2%. The results of this
+calculation can also be written to a text file or an excel spreadsheet.
 
-ESAPI/Projects/VMATTBIautoPlan --> binary plug in
-ESAPI_MT/VMATTBI_optLoopMT --> stand-alone executable
-
-Some important notes to make the scripts run:
-binary plug-in:
--for the most part, this script is pretty self-contained
--the main parameters that can be adjusted are the global variables noted at the beginning of the UI class (UI.xaml.cs file)
--if you want to adjust the default energy for the static AP/PA beams, you need to adjust the beam energy specifier used in assigning ebmpStatic 
-(two total instances of "6X" in the constructors for the class)
-
-stand-alone executable:
--
-
-Please see the VMAT_TBI_install_and_run_guide.pdf file to help you get up and running quickly. Feel free to download the example (anonymized) patient data on the master branch for some examples of running the code on real
-patient data.
+Please see the doseStats_guide.pdf file to learn more about the code and how to get it up and running. I'll work on writing a short run and install guide (similar to the one I wrote for the VMAT TBI code).
 
 If you have questions, leave a comment and i'll try and respond as quickly as I can.
