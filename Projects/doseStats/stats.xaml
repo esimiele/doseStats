@@ -1,0 +1,42 @@
+﻿<Window x:Class="doseStats.stats"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:doseStats"
+        mc:Ignorable="d"
+        HorizontalAlignment="Center" Height="605" Width="1465" Background="DarkGray">
+    <Grid>
+        <Label Content="Dose statistics" FontSize="20" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,390,0"></Label>
+        <Button Content="Shortcuts" HorizontalAlignment="Right" Height="20" Width="70" VerticalAlignment="Top" Margin="0,12,25,0" Click="openShortcuts_Click"></Button>
+        <Button Content="Help (Ctrl + H)" HorizontalAlignment="Right" Height="20" Width="100" VerticalAlignment="Top" Margin="0,12,1323,0" Click="openHelp_Click"></Button>
+        <ScrollViewer x:Name ="resultsScroller" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="845" Height="490" Margin="0,0,5,35" BorderBrush="Black">
+            <TextBlock x:Name="results" FontSize="12" FontFamily="Courier New" Width="825" Background="White" ></TextBlock>
+        </ScrollViewer>
+        <Button x:Name="writeExcel" Content="Write results to Excel (Ctrl + W)" HorizontalAlignment="Right" Height="20" Width="175" Margin="0,0,330,5" VerticalAlignment="Bottom" Click="WriteResultsExcel_Click"/>
+        <Button x:Name="writeTxt" Content="Write results to text file" HorizontalAlignment="Right" Height="20" Width="140" Margin="0,0,630,5" VerticalAlignment="Bottom" Click="WriteResultsText_Click"/>
+        <Button x:Name="RunDoseCalc" Content="Run dose calculation (Ctrl + D)" Width="170" Height="20" Margin="0,0,60,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="runSecondCheck_Click"></Button>
+
+        <Label Content="Parameters" FontSize="20" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,1110,0"></Label>
+        <Label Content="Assume maximum EQD2 dose contribution from EBRT (Ctrl + A):" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,40,965,0" Visibility="Hidden"></Label>
+        <CheckBox x:Name="assumeMaxEQD2_ckbox" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,48,947,0" IsChecked="true" Click="assumeMaxEQD2_ckbox_Click" Visibility="Hidden"></CheckBox>
+        <Label Content="EBRT Dose/fx (Gy):" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,73,1295,0"></Label>
+        <TextBox x:Name="EBRTdosePerFxTB" Width="40" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,1254,0" TextAlignment="Center" TextChanged="EBRTdosePerFxTB_TextChanged"></TextBox>
+        <Label Content="EBRT num fx:" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,73,1129,0"></Label>
+        <TextBox x:Name="EBRTnumFxTB" Width="40" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,1090,0" TextAlignment="Center" TextChanged="EBRTnumFxTB_TextChanged"></TextBox>
+        <Label Content="EBRT Rx dose (Gy):" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,73,925,0"></Label>
+        <TextBox x:Name="EBRTRxDoseTB" Width="40" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,885,0" TextAlignment="Center" IsReadOnly="True"></TextBox>
+
+        <Grid Height="25" Width ="500" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,120,910,0">
+            <Button Content="Add DVH statistic" Width="110" HorizontalAlignment="Left" VerticalAlignment="Top" Click="add_stat_Click"/>
+            <Button Content="Add default DVH statistics" Width="150" HorizontalAlignment="Center" VerticalAlignment="Top" Click="add_defaults_Click" Margin="185,0,165,0"/>
+            <Button Content="Clear List" Width="80" HorizontalAlignment="Right" VerticalAlignment="Top" Click="clear_stats_Click"/>
+        </Grid>
+
+        <ScrollViewer x:Name="statParamScroller" Height="383" Width="585" Margin="0,148,860,0" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <StackPanel Name="stat_parameters" Margin="5"></StackPanel>
+        </ScrollViewer>
+        <Button x:Name="calcStats" Content="Calculate statistics (Ctrl + E)" HorizontalAlignment="Right" Height="20" Width="160" Margin="0,0,1100,5" VerticalAlignment="Bottom" Click="calculateStatistics_Click"/>
+    </Grid>
+
+</Window>
