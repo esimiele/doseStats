@@ -1,8 +1,27 @@
-3-10-2022
+5-20-2022
 
 Latest release: 
-doseStats_v0.5_beta
+doseStats_v0.7
 
+Previous release:
+doseStats_v0.5beta
+
+Changes from previous release:
+-version was incremented to 0.7 from 0.5 as I didn't push v0.6 to this repo (minor changes from v0.5 and forgot to do it). The current version in my clinic is v0.7
+-number of fractions is now calculated from the primary reference point total dose / primary reference point session dose (instead of daily dose). This fixes an issue for BID treatments
+where the number of calculated fractions would be a factor of 2 less than the actual number of fractions
+-The results TextBox was changed to a TextBlock so I could include formatting to the results text. The Met? column in the text window is now highlighted green/red depending on if the constraint
+was met. In addition the YES/NO text in the Met? column is bolded.
+-Add toggle option so user can quickly toggle back and forth and see the physical dose that needs to be delivered for this fraction and subsequent fractions to achieve the desired EQD2 constraint
+-Added manual dose adjustment window that the user can launch. A common part of reviewing/revising a plan in our clinic is seeing "if we give this much dose, what's the EQD2? Ok, well what about this dose?" 
+This becomes tedious in excel as you have to type in the number and copy the value for all subsequent fractions. This issue is addressed in the manual dose adjustment window where the user
+can launch the window and it will report the doses delivered in the previous fractions, the dose in the current fraction, the EQD2, and if the constraint is met. The user can adjust the dose for the current
+fraction and the EQD2 will update on-the-fly so you can quickly determine what physical dose you should be shooting for in this fraction.
+-revised some of the underlying structure of the code and moved redundant functions to the helpers class
+-added option for user to specify physician Id (along with the name) in the config.ini file. The script can then match the primary oncologist Id with the Id list entered from the config.ini file
+and write the physician name, rather than physician Id to the excel spreadsheet
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 The purpose of this script is to improve the efficiency and safety of planning for HDR GYN brachytherapy. The ABS and GEC-ESTRO recommends brachytherapy as an integral part of the
 treatment process from GYN cancer patients. The treatment dose (external beam and brachy) should be evaluated in terms of EQD2 where the ABS recommends an EQD2 of 80-90 Gy be delivered to the
 HRCTV for cervical carcinoma. In the clinics I've worked in, the dose from external beam is assumed to be uniform and equal to the prescription dose whereas the EQD2 is explicitly evaluated for each fraction of brachytherapy.
