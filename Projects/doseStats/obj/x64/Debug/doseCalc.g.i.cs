@@ -84,7 +84,7 @@ namespace doseStats {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/doseStats_v0.5_beta.esapi;component/dosecalc.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/doseStats_v0.7.esapi;component/dosecalc.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\doseCalc.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

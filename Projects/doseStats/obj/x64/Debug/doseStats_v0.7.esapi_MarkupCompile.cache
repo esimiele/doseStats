@@ -1,4 +1,4 @@
-﻿doseStats_v0.5_beta.esapi
+﻿doseStats_v0.7.esapi
 
 
 library
@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 
-235305749
+3747350033
 
-81831329231
-18721927789
-doseCalc.xaml;stats.xaml;
+11-1994627936
+20-507398581
+doseCalc.xaml;manualDoseAdjustment.xaml;stats.xaml;
 
-False
+True
 

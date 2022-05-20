@@ -14,7 +14,9 @@ T:\Users\ESimiele\Rotation 8\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0
 T:\Users\ESimiele\Rotation 8\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.2.esapi.g.resources
 T:\Users\ESimiele\Rotation 8\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.2.esapi.dll
 T:\Users\ESimiele\Rotation 8\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.2.esapi.pdb
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseCalc.g.cs
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\stats.g.cs
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseCalc.baml
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\stats.baml
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\autoSecondCheck.confirmUI.resources
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\autoSecondCheck.selectItem.resources
@@ -22,30 +24,14 @@ Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats.csproj.Generate
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats.csproj.CoreCompileInputs.cache
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats.csproj.CopyComplete
 Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats.csproj.AssemblyReference.cache
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseCalc.g.cs
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseCalc.baml
-Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.5_beta.esapi.dll.config
-Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.5_beta.esapi.dll
-Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.5_beta.esapi.pdb
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi_MarkupCompile.cache
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi_MarkupCompile.lref
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.g.resources
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.dll
-Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.pdb
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\plugins\doseStats_v0.5_beta.esapi.dll.config
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\plugins\doseStats_v0.5_beta.esapi.dll
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\plugins\doseStats_v0.5_beta.esapi.pdb
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseCalc.g.cs
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\stats.g.cs
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi_MarkupCompile.cache
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi_MarkupCompile.lref
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseCalc.baml
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\stats.baml
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.g.resources
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\autoSecondCheck.confirmUI.resources
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\autoSecondCheck.selectItem.resources
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats.csproj.GenerateResource.cache
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats.csproj.CoreCompileInputs.cache
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats.csproj.CopyComplete
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.dll
-C:\Users\Eric Simiele\Documents\GitHub\HDR_doNotDelete\HDR\Projects\doseStats\obj\x64\Debug\doseStats_v0.5_beta.esapi.pdb
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\manualDoseAdjustment.g.cs
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\manualDoseAdjustment.baml
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats.Properties.Resources.resources
+Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.7.esapi.dll.config
+Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.7.esapi.dll
+Z:\ESimiele\HDR\ESAPI\plugins\doseStats_v0.7.esapi.pdb
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.7.esapi_MarkupCompile.cache
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.7.esapi_MarkupCompile.lref
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.7.esapi.g.resources
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.7.esapi.dll
+Z:\ESimiele\HDR\ESAPI\Projects\doseStats\obj\x64\Debug\doseStats_v0.7.esapi.pdb

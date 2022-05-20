@@ -55,6 +55,10 @@ namespace doseStats
         int clearStatBtnCounter = 0;
         //this flag is used to signal if the plan Id's are in the correct format. Specifically, if the fourth character in the plan Id is NOT an integer, this flag is set to true indicating there was a problem
         public bool formatError = false;
+        //flag used to indicate if the ideal doses are shown
+        bool isIdealDoses = false;
+
+
         public stats(BrachyPlanSetup brachyPlan, VMS.TPS.Script.Parameters config)
         {
             InitializeComponent();
@@ -64,7 +68,7 @@ namespace doseStats
             plan = brachyPlan;
             selectedSS = plan.StructureSet;
             //determine the number of BRACHY fractions from the primary reference point in the open plan in the current context. This method is required since there is no other information in the plan that identifies the number of fractions
-            try { numFractions = (int)(plan.PrimaryReferencePoint.TotalDoseLimit / plan.PrimaryReferencePoint.DailyDoseLimit); }
+            try { numFractions = (int)(plan.PrimaryReferencePoint.TotalDoseLimit / plan.PrimaryReferencePoint.SessionDoseLimit); }
             catch { MessageBox.Show(String.Format("Primary reference point dose limits not set! \nPlease fix and try again!")); formatError = true; return; }
             //additional logic for interstitial treatments that are typically planned 2 fractions at a time (these treatments are typically 4 fractions)
             if (plan.ProtocolID.ToLower().Contains("interstitial") && numFractions == 2) numFractions = 4;
@@ -97,11 +101,6 @@ namespace doseStats
             if (containsHDR) plans.Sort(delegate (BrachyPlanSetup x, BrachyPlanSetup y) { return x.Id.Substring(x.Id.IndexOf("HDR") + 3, 1).CompareTo(y.Id.Substring(y.Id.IndexOf("HDR") + 3, 1)); });
             else plans.Sort(delegate (BrachyPlanSetup x, BrachyPlanSetup y)
             { return double.Parse(x.Id.Substring(x.Id.IndexOf("_") + 1, x.Id.IndexOf("_", x.Id.IndexOf("_") + 1) - x.Id.IndexOf("_") - 1)).CompareTo(double.Parse(y.Id.Substring(y.Id.IndexOf("_") + 1, y.Id.IndexOf("_", y.Id.IndexOf("_") + 1) - y.Id.IndexOf("_") - 1))); });
-            //string test = "";
-            //foreach (BrachyPlanSetup p in plans) test += p.Id.Substring(p.Id.IndexOf("_")+1, p.Id.IndexOf("_", p.Id.IndexOf("_") + 1) - p.Id.IndexOf("_") - 1) + System.Environment.NewLine;
-            //MessageBox.Show(test);
-            //return;
-
 
             //if (plan.ProtocolID.Contains("T&O") || plan.ProtocolID.Contains("TO")) 
             //    statsRequest.Add(new Tuple<string, double, List<Tuple<string, double, VolumePresentation, DoseValuePresentation>>>("pt A", 10.0, new List<Tuple<string, double, VolumePresentation, DoseValuePresentation>> { new Tuple<string, double, VolumePresentation, DoseValuePresentation>("Dmean (Gy)", 0.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute) }));
@@ -120,21 +119,28 @@ namespace doseStats
             writeExcelMacro.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
             runSecondDoseCalcMacro.InputGestures.Add(new KeyGesture(Key.D, ModifierKeys.Control));
             closeScriptMacro.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
-            toggleAssumeMaxEQD2.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+           // toggleAssumeMaxEQD2.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
             showHelpMacro.InputGestures.Add(new KeyGesture(Key.H, ModifierKeys.Control));
+            toggleShowIdealDoses.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+            openManualAdjustWindow.InputGestures.Add(new KeyGesture(Key.M, ModifierKeys.Control));
+
             CommandBindings.Add(new CommandBinding(runStaticsMacro, calculateStatistics_Click));
             CommandBindings.Add(new CommandBinding(writeExcelMacro, WriteResultsExcel_Click));
             CommandBindings.Add(new CommandBinding(runSecondDoseCalcMacro, runSecondCheck_Click));
             CommandBindings.Add(new CommandBinding(closeScriptMacro, closeWindow));
             CommandBindings.Add(new CommandBinding(showHelpMacro, openHelp_Click));
             //CommandBindings.Add(new CommandBinding(toggleAssumeMaxEQD2, toggleEQD2));
+            CommandBindings.Add(new CommandBinding(toggleShowIdealDoses, toggleIdealDosesCheckBox));
+            CommandBindings.Add(new CommandBinding(openManualAdjustWindow, showMDAwindow));
         }
 
         RoutedCommand runStaticsMacro = new RoutedCommand();
         RoutedCommand writeExcelMacro = new RoutedCommand();
         RoutedCommand runSecondDoseCalcMacro = new RoutedCommand();
         RoutedCommand closeScriptMacro = new RoutedCommand();
-        RoutedCommand toggleAssumeMaxEQD2 = new RoutedCommand();
+        //RoutedCommand toggleAssumeMaxEQD2 = new RoutedCommand();
+        RoutedCommand toggleShowIdealDoses = new RoutedCommand();
+        RoutedCommand openManualAdjustWindow = new RoutedCommand();
         RoutedCommand showHelpMacro = new RoutedCommand();
 
         //removed per Dr. Kidd's request
@@ -184,7 +190,8 @@ namespace doseStats
             message += "Write results to Excel --------------> Ctrl + W" + System.Environment.NewLine;
             message += "Run second dose calc --------------> Ctrl + D" + System.Environment.NewLine;
             message += "Display help guide --------------> Ctrl + H" + System.Environment.NewLine;
-            //message += "Toggle EQD2 assumption --------------> Ctrl + A" + System.Environment.NewLine;
+            message += "Toggle show ideal doses --------------> Ctrl + A" + System.Environment.NewLine;
+            message += "Open manual dose adjustment window --------------> Ctrl + M" + System.Environment.NewLine;
             MessageBox.Show(message);
         }
 
@@ -192,6 +199,119 @@ namespace doseStats
         private void openHelp_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start(p.documentation);
+        }
+
+        private void showMDAwindow(object sender, RoutedEventArgs e)
+        {
+            manualDoseAdjustment mdaWindow = new manualDoseAdjustment(numFractions, statsResults, p);
+            mdaWindow.ShowDialog();
+        }
+
+        private void toggleIdealDosesCheckBox(object sender, RoutedEventArgs e)
+        {
+            if (showIdealsCheckBox.IsChecked.Value) showIdealsCheckBox.IsChecked = false;
+            else showIdealsCheckBox.IsChecked = true;
+        }
+
+        private void showIdealDoses(object sender, RoutedEventArgs e)
+        {
+            if (showIdealsCheckBox.IsChecked.Value)
+            {
+                isIdealDoses = true;
+                //no external beam plan found or we want to assume the max EQD2. Assume alpha/beta ratios of 10 Gy and 3 Gy for the tumor and OAR, respectively
+                //variables to hold the EBRT total for the target and the OARs
+                double tumorEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 10) / (2.0 + 10.0);
+                double bladderEBRTtotal = 0.0, bowelEBRTtotal = 0.0, rectumEBRTtotal = 0.0, sigmoidEBRTtotal = 0.0;
+                bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = sigmoidEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 3) / (2.0 + 3.0);
+                List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> statsResults_temp = new List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> { };
+                List<Tuple<string, double, string, List<double>>> stats_temp = new List<Tuple<string, double, string, List<double>>> { };
+                helpers h = new helpers();
+
+                foreach (Tuple<string, double, List<Tuple<string, double, string, List<double>>>> itr in statsResults)
+                {
+                    //statistics, query value, units, vector of results from the plans
+                    foreach (Tuple<string, double, string, List<double>> itr1 in itr.Item3)
+                    {
+                        if (itr1.Item1 == "Dose at Volume (Gy)" || itr1.Item1 == "Dmean (Gy)")
+                        {
+                            //need to compute EQD2 values for the requested absolute doses
+                            double HDRsum = 0.0;
+                            double HDR_EBRT_sum = 0.0;
+                            double val = 0.0;
+                            double currentHDREQD2 = 0.0;
+                            for (int i = 0; i < numFractions; i++)
+                            {
+                                //EQD2 is calculated for each structure for a SINGLE fraction (i.e., the current fraction). The single fraction EQD2 values are then added to obtain the cumulative EQD2. 
+                                //If the current loop iteration is less than the size of the results vector, calculate EQD2 based on the value in the results vector, otherwise, propagate the last element in the vector
+                                //forward to the remaining fractions
+                                if (i < itr1.Item4.Count) { val = itr1.Item4.ElementAt(i) * ((itr1.Item4.ElementAt(i) + itr.Item2) / (2 + itr.Item2)); if(i < itr1.Item4.Count - 1) currentHDREQD2 += val; }
+                                else val = itr1.Item4.Last() * ((itr1.Item4.Last() + itr.Item2) / (2 + itr.Item2));
+                                HDRsum += val;
+                            }
+                            //calculate the total EQD2 including HDR and EBRT
+                            if (itr.Item1.Contains("gtv") || itr.Item1.Contains("ctv") || itr.Item1.Contains("pt A")) HDR_EBRT_sum = HDRsum + tumorEBRTtotal;
+                            else
+                            {
+                                double total = 0.0;
+                                //messy, but legacy code leftover from retrieving the EQD2 data from the actual external beam plans rather than assuming a particular dose was delivered
+                                if (itr.Item1.Contains("bladder")) total = bladderEBRTtotal;
+                                else if (itr.Item1.Contains("bowel")) total = bowelEBRTtotal;
+                                else if (itr.Item1.Contains("rectum")) total = rectumEBRTtotal;
+                                else if (itr.Item1.Contains("sigmoid")) total = sigmoidEBRTtotal;
+                                HDR_EBRT_sum = HDRsum + total;
+                            }
+
+                            //this is the logic to determine if the requested statistic has a dosimetric aim and/or limit that we are shooting for. Currently we have aims and limits for:
+                            //Bladder D2cc, Bowel D2cc, Rectum D2cc, CTV D98%, CTV D90%, and PtA Dmean
+                            //See the Gyn HDR BT spreadsheet for a list of current aims and limits
+                            bool met = false;
+                            Tuple<string, string> value = h.getAimLimit(p, itr.Item1, itr1.Item1, itr1.Item2, itr1.Item3);
+                            string aim = value.Item1;
+                            string limit = value.Item2;
+
+                            //if either the aim or limit are nonempty, add these values to the reporting window text, close the final bracket, add the text to the window, and add a new line
+                            if (aim != "" || limit != "")
+                            {
+                                met = h.checkIsMet(aim, limit, HDR_EBRT_sum);
+                                if(!met)
+                                {
+                                    int deliveredFx = itr1.Item4.Count;
+                                    itr1.Item4.RemoveAt(itr1.Item4.Count - 1);
+                                    string aimLimitTemp;
+                                    if (aim != "") aimLimitTemp = aim;
+                                    else aimLimitTemp = limit;
+                                    if (double.TryParse(aimLimitTemp.Substring(1, 2), out double eqd2Val))
+                                    {
+                                        if (itr.Item1.Contains("gtv") || itr.Item1.Contains("ctv") || itr.Item1.Contains("pt A")) eqd2Val -= (tumorEBRTtotal + currentHDREQD2);
+                                        else eqd2Val -= (bladderEBRTtotal + currentHDREQD2);
+                                        if (aimLimitTemp.Substring(0, 1) == ">") eqd2Val += 0.01;
+                                        else eqd2Val -= 0.01;
+                                        itr1.Item4.Add((Math.Sqrt(Math.Pow(itr.Item2, 2) + 4 * eqd2Val * (2 + itr.Item2) / (numFractions - deliveredFx + 1)) - itr.Item2) / 2);
+                                        //MessageBox.Show(String.Format("{0}, {1:0.00}, {2:0.00}, {3}", itr.Item1, currentHDREQD2, eqd2Val, (numFractions - deliveredFx + 1)));
+                                    }
+                                    else MessageBox.Show(String.Format("Double value could not be parsed from Aims and Limits! ({0})", aimLimitTemp)); ;
+                                }
+                            }
+                        }
+                    }
+                }
+                updateStats();
+                FlowDocument myFlowDoc = new FlowDocument();
+                results.Text += (System.Environment.NewLine);
+                results.Text += ("WARNING!! THE ABOVE DOSES REPRESENT THE IDEAL DOSES THAT JUST MEET THE EQD2 AIMS/LIMITS!" + System.Environment.NewLine);
+                results.Text += ("THEY DO NOT REPRESENT THE ACHIEVED DOSES IN THE CURRENT PLAN!!!");
+                resultsScroller.ScrollToBottom();
+            }
+            else
+            {
+                isIdealDoses = false;
+                //clear the existing vectors
+                statsResults.Clear();
+                //clear excel data vectors
+                for (int i = 0; i < excelData.Count; i++) excelData.ElementAt(i).Clear();
+                getStatsFromPlans();
+                updateStats();
+            }
         }
 
         //code used to update the total EBRT dose dynamically as the text is changed
@@ -777,7 +897,6 @@ namespace doseStats
         //the function to actually grab the requested statistic for a given structure from a given plan
         private double getData(BrachyPlanSetup p, Structure s, Tuple<string, double, VolumePresentation, DoseValuePresentation> itr)
         {
-
             double value = 0.0;
             p.DoseValuePresentation = DoseValuePresentation.Absolute;
             if (itr.Item1.Contains("Dose at Volume"))
@@ -837,6 +956,7 @@ namespace doseStats
         //function to update the text window with the retrieved results. Be careful messing with the formatting in the string.format functions
         private void updateStats()
         {
+            results.Text = "";
             //variables to hold the EBRT total for the target and the OARs
             double tumorEBRTtotal = 0.0;
             double bladderEBRTtotal = 0.0, bowelEBRTtotal = 0.0, rectumEBRTtotal = 0.0, sigmoidEBRTtotal = 0.0;
@@ -885,15 +1005,15 @@ namespace doseStats
             else
             {
                 //no external beam plan found or we want to assume the max EQD2. Assume alpha/beta ratios of 10 Gy and 3 Gy for the tumor and OAR, respectively
-                tumorEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (1 + p.EBRTdosePerFx / 10) / 1.2;
-                bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = sigmoidEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (1 + p.EBRTdosePerFx / 3) * 0.6;
+                tumorEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 10) / (2.0 + 10.0);
+                bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = sigmoidEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 3.0) / (2.0 + 3.0);
             }
             //get the needle dwell time (i.e., not the Tandem, ovoids, VC, etc.) and the total dwell time for all applicators
             double needleDwellTime = getNeedleDwellTime(plan);
             double totalDwellTime = getDwellTime(plan.Catheters.ToList());
 
             //start populating the text window
-            results.Text = "";
+            results.Text += "";
             //results.Document.Blocks.Add(new Paragraph(new Run("")));
             results.Text += String.Format("{0}", DateTime.Now.ToString()) + System.Environment.NewLine;
             //info about patient, id, plan, current fraction, etc.
@@ -951,17 +1071,20 @@ namespace doseStats
             //iterate through the retrieved statistics and add their results to the output window. The results will be listed for each structure where each structure is listed in alphabetical order
             //for any retrieved dose statistics reported in absolute units, the EQD2 will be calculated. 
             //structure id, alpha/beta, list of statistics, query value, units, vector of results from the plans for this structure
+            helpers h = new helpers();
             foreach (Tuple<string, double, List<Tuple<string, double, string, List<double>>>> itr in statsResults)
             {
-                results.Text += String.Format("{0}(α/β = {1}Gy)", itr.Item1, itr.Item2) + System.Environment.NewLine;
+                //the way the text is added to the textblock changes for this section as special formatting is applied to the YES/NO in the 'met?' section of the line
+                results.Inlines.Add(String.Format("{0}(α/β = {1}Gy)", itr.Item1, itr.Item2) + System.Environment.NewLine);
                 //statistics, query value, units, vector of results from the plans
                 foreach (Tuple<string, double, string, List<double>> itr1 in itr.Item3)
                 {
-                    message = " ";
+                    //update this line of data. This is the physical data from each plan with no additional post-processing
+
                     //requested statistic = query value (units on query value)
-                    if (itr1.Item1.Contains("Dose at Volume") || itr1.Item1.Contains("Volume at Dose")) message += String.Format("{0,-30}", String.Format("{0} = {1:0.0}{2} ", itr1.Item1, itr1.Item2, itr1.Item3));
+                    if (itr1.Item1.Contains("Dose at Volume") || itr1.Item1.Contains("Volume at Dose")) results.Inlines.Add(String.Format(" {0,-30}", String.Format("{0} = {1:0.0}{2} ", itr1.Item1, itr1.Item2, itr1.Item3)));
                     //Dmean or Volume requested
-                    else message += String.Format("{0, -30}", itr1.Item1);
+                    else results.Inlines.Add(String.Format(" {0, -30}", itr1.Item1));
 
                     //iterate through the number of planned fractions and retrieve the statistics from the associated plans
                     for (int i = 0; i < numFractions; i++)
@@ -977,7 +1100,7 @@ namespace doseStats
                             if (itr1.Item1.Contains("Dose at Volume") || itr1.Item1.Contains("Dmean")) value = itr1.Item4.Last();
                             else value = 0.0;
                         }
-                        message += String.Format("| {0,-5:N1} ", value);
+                        results.Inlines.Add(String.Format("| {0,-5:N1} ", value));
 
                         //if the requested statistic meets the criteria in the following if statements, then it is a metric of interest that should be saved so that it can be written to the excel file
                         int ind = p.excelStatistics.FindIndex(x => x.Item1 == itr.Item1 && x.Item2 == itr1.Item1 && x.Item3 == itr1.Item2 && x.Item4 == itr1.Item3);
@@ -988,15 +1111,13 @@ namespace doseStats
                             if (ind != -1) excelData.ElementAt(ind).Add(value);
                         }
                     }
-                    message += "|" + System.Environment.NewLine;
-                    //update this line of data. This is the physical data from each plan with no additional post-processing
-                    results.Text += message;
+                    results.Inlines.Add("|");
+                    results.Inlines.Add(new LineBreak());
 
                     if (itr1.Item1 == "Dose at Volume (Gy)" || itr1.Item1 == "Dmean (Gy)")
                     {
                         //need to compute EQD2 values for the requested absolute doses
-                        message = " ";
-                        message += String.Format("{0,-30}", String.Format("EQD2(α/β = {0}Gy) ", itr.Item2));
+                        results.Inlines.Add(String.Format(" {0,-30}", String.Format("EQD2(α/β = {0}Gy) ", itr.Item2)));
                         double HDRsum = 0.0;
                         double HDR_EBRT_sum = 0.0;
                         double val = 0.0;
@@ -1005,9 +1126,9 @@ namespace doseStats
                             //EQD2 is calculated for each structure for a SINGLE fraction (i.e., the current fraction). The single fraction EQD2 values are then added to obtain the cumulative EQD2. 
                             //If the current loop iteration is less than the size of the results vector, calculate EQD2 based on the value in the results vector, otherwise, propagate the last element in the vector
                             //forward to the remaining fractions
-                            if (i < itr1.Item4.Count) val = itr1.Item4.ElementAt(i) * ((itr1.Item4.ElementAt(i) + itr.Item2) / (2 + itr.Item2));
-                            else val = itr1.Item4.Last() * ((itr1.Item4.Last() + itr.Item2) / (2 + itr.Item2));
-                            message += String.Format("| {0,-5:N1} ", val);
+                            if (i < itr1.Item4.Count) val = itr1.Item4.ElementAt(i) * ((itr1.Item4.ElementAt(i) + itr.Item2) / (2.0 + itr.Item2));
+                            else val = itr1.Item4.Last() * ((itr1.Item4.Last() + itr.Item2) / (2.0 + itr.Item2));
+                            results.Inlines.Add(String.Format("| {0,-5:N1} ", val));
                             HDRsum += val;
                         }
                         //calculate the total EQD2 including HDR and EBRT
@@ -1023,63 +1144,39 @@ namespace doseStats
                             HDR_EBRT_sum = HDRsum + total;
                         }
                         //report the HDR EQD2 and the EBRT+HDR EQD2
-                        message += String.Format("| {0,-7:N1} | {1,-7:N1}  ", HDRsum, HDR_EBRT_sum);
+                        results.Inlines.Add(String.Format("| {0,-7:N1} | {1,-7:N1}  ", HDRsum, HDR_EBRT_sum));
 
                         //this is the logic to determine if the requested statistic has a dosimetric aim and/or limit that we are shooting for. Currently we have aims and limits for:
                         //Bladder D2cc, Bowel D2cc, Rectum D2cc, CTV D98%, CTV D90%, and PtA Dmean
                         //See the Gyn HDR BT spreadsheet for a list of current aims and limits
-                        string aim = "";
-                        string limit = "";
-                        Tuple<string, string, double, string, string, string> tmp;
                         bool met = false;
-
-                        if(itr.Item1.Contains("Dmean") || itr.Item1.Contains("Volume (cc)")) tmp = p.aimsLimits.FirstOrDefault(x => x.Item1 == itr.Item1 && x.Item2 == itr1.Item1);
-                        else tmp = p.aimsLimits.FirstOrDefault(x => x.Item1 == itr.Item1 && x.Item2 == itr1.Item1 && x.Item3 == itr1.Item2 && x.Item4 == itr1.Item3);
-                        if (tmp != null) { aim = tmp.Item5; limit = tmp.Item6; }
+                        Tuple<string, string> value = h.getAimLimit(p, itr.Item1, itr1.Item1, itr1.Item2, itr1.Item3);
+                        string aim = value.Item1;
+                        string limit = value.Item2;
 
                         //if either the aim or limit are nonempty, add these values to the reporting window text, close the final bracket, add the text to the window, and add a new line
                         if (aim != "" || limit != "")
                         {
-                            met = checkIsMet(aim, limit, HDR_EBRT_sum);
-                            message += String.Format("| {0,-3} | {1,-5} | {2,-4} |", aim, limit, met ? "YES" : "NO");
+                            met = h.checkIsMet(aim, limit, HDR_EBRT_sum);
+                            results.Inlines.Add(new Run(String.Format("| {0,-3} | {1,-5} |", aim, limit)));
+                            Run r = new Run(String.Format(" {2,-4} ", aim, limit, met ? "YES" : " NO")) { FontWeight = FontWeights.Bold };
+                            if (met) r.Background = Brushes.LightGreen;
+                            else r.Background = Brushes.LightPink;
+                            results.Inlines.Add(r);
+                            results.Inlines.Add("|");
                         }
-                        else message += "|";
-                        message += System.Environment.NewLine;
-                        results.Text += message;
+                        else results.Inlines.Add("|");
+                        results.Inlines.Add(new LineBreak());
                     }
                 }
                 //add a line of  ---- after each structure to make it look cleaner
-                results.Text += "------------------------------------------------------------------------------------------------------------------" + System.Environment.NewLine;
+                results.Inlines.Add("------------------------------------------------------------------------------------------------------------------");
+                results.Inlines.Add(new LineBreak());
             }
+            //results.Inlines.Add(new Run("test") { Background = Brushes.Red });
             resultsScroller.ScrollToBottom();
         }
-
-        private bool checkIsMet(string aim, string limit, double HDR_EBRT_sum)
-        {
-            bool aimResult = false;
-            bool limitResult = false;
-            bool checkBoth = false;
-            if (aim != "" && limit != "") checkBoth = true;
-            if(aim != "")
-            {
-                if (aim.Substring(0, 1) == ">" && HDR_EBRT_sum > double.Parse(aim.Substring(1, 2))) aimResult = true;
-                else if (aim.Substring(0, 1) == "<" && HDR_EBRT_sum < double.Parse(aim.Substring(1, 2))) aimResult = true;
-                if (!checkBoth) return aimResult;
-            }
-            if (limit != "")
-            {
-                if (limit.Substring(0, 1) == ">" && HDR_EBRT_sum > double.Parse(limit.Substring(1, 2))) limitResult = true;
-                else if (limit.Substring(0, 1) == "<" && HDR_EBRT_sum < double.Parse(limit.Substring(1, 2))) limitResult = true;
-                if (!checkBoth) return limitResult;
-            }
-            //if the less than or greater than symbol is the same between the aim and limit, we just need to meet one of the limits for it to pass
-            if ((aim.Substring(0, 1) == limit.Substring(0, 1)) && (aimResult || limitResult)) return true;
-            //if the symbols are different between the aim and limit, we need to meet BOTH limits for it to pass
-            else if (aimResult && limitResult) return true;
-            else return false;
-            
-        }
-
+        
         //get the dwell time of the needles only
         private double getNeedleDwellTime(BrachyPlanSetup p)
         {
@@ -1174,6 +1271,7 @@ namespace doseStats
         //unfortunately, this function is messy, but necessary since there is not standard formatting for the excel spreadsheet for which statistic goes where (which makes it difficult to add/subtract metrics)
         private void WriteResultsExcel_Click(object sender, RoutedEventArgs e)
         {
+            if (isIdealDoses) { MessageBox.Show("Error! Ideal doses are shown! Please uncheck the 'Show Ideal Doses' checkbox and try again!"); return; }
             // create Excel App
             Excel.Application myExcelApplication = new Excel.Application();
             Excel.Workbook myExcelWorkbook;
@@ -1193,7 +1291,9 @@ namespace doseStats
             //write the requested header information to the excel file including patient name, EBRT num fx, EBRT dose per fx, etc.
             if (p.excelPatientName.Item1 != 0) myExcelWorkSheet.Cells[p.excelPatientName.Item1, p.excelPatientName.Item2] = String.Format("{0}, {1}", VMS.TPS.Script.GetScriptContext().Patient.LastName, VMS.TPS.Script.GetScriptContext().Patient.FirstName);
             if (p.excelPatientMRN.Item1 != 0) myExcelWorkSheet.Cells[p.excelPatientMRN.Item1, p.excelPatientMRN.Item2] = VMS.TPS.Script.GetScriptContext().Patient.Id;
-            if (p.excelPhysician.Item1 != 0) myExcelWorkSheet.Cells[p.excelPhysician.Item1, p.excelPhysician.Item2] = VMS.TPS.Script.GetScriptContext().Patient.PrimaryOncologistId;
+            string physicianName = VMS.TPS.Script.GetScriptContext().Patient.PrimaryOncologistId;
+            if (p.physicianIDs.Any()) p.physicianIDs.TryGetValue(physicianName, out physicianName);
+            if (p.excelPhysician.Item1 != 0) myExcelWorkSheet.Cells[p.excelPhysician.Item1, p.excelPhysician.Item2] = physicianName;
             if (p.excelDate.Item1 != 0) myExcelWorkSheet.Cells[p.excelDate.Item1, p.excelDate.Item2] = DateTime.Now.ToString();
             if (p.excelTxSummary.Item1 != 0) myExcelWorkSheet.Cells[p.excelTxSummary.Item1, p.excelTxSummary.Item2] = String.Format("{0}Gy EBRT + HDR", p.EBRTdosePerFx * p.EBRTnumFx);
             if (p.excelEBRTdosePerFx.Item1 != 0) myExcelWorkSheet.Cells[p.excelEBRTdosePerFx.Item1, p.excelEBRTdosePerFx.Item2] = String.Format("{0:0.00}", p.EBRTdosePerFx);
@@ -1224,7 +1324,7 @@ namespace doseStats
                         for (int j = 0; j < i; j++) temp2[0]++;
                         if (getNeedles(plans.ElementAt(i).Catheters.ToList(), plans.ElementAt(i)).Count() > 0)
                         {
-                            myExcelWorkSheet.Cells[p.excelNeedleContr.Item1, temp[0].ToString()] = (100 * (getNeedleDwellTime(plans.ElementAt(i))) / (getDwellTime(plans.ElementAt(i).Catheters.ToList())));
+                            myExcelWorkSheet.Cells[p.excelNeedleContr.Item1, temp[0].ToString()] = 100 * getNeedleDwellTime(plans.ElementAt(i)) / getDwellTime(plans.ElementAt(i).Catheters.ToList());
                             myExcelWorkSheet.Cells[p.excelNumNeedles.Item1, temp2[0].ToString()] = getNeedles(plans.ElementAt(i).Catheters.ToList(), plans.ElementAt(i)).Count();
                         }
                         else
@@ -1253,7 +1353,7 @@ namespace doseStats
                     {
                         if (getNeedles(plans.ElementAt(i).Catheters.ToList(), plans.ElementAt(i)).Count() > 0)
                         {
-                            myExcelWorkSheet.Cells[p.excelNeedleContr.Item1 + i, p.excelNeedleContr.Item2] = (100 * (getNeedleDwellTime(plans.ElementAt(i))) / (getDwellTime(plans.ElementAt(i).Catheters.ToList())));
+                            myExcelWorkSheet.Cells[p.excelNeedleContr.Item1 + i, p.excelNeedleContr.Item2] = 100 * getNeedleDwellTime(plans.ElementAt(i)) / getDwellTime(plans.ElementAt(i).Catheters.ToList());
                             myExcelWorkSheet.Cells[p.excelNumNeedles.Item1 + i, p.excelNumNeedles.Item2] = getNeedles(plans.ElementAt(i).Catheters.ToList(), plans.ElementAt(i)).Count();
                         }
                         else
@@ -1268,7 +1368,9 @@ namespace doseStats
             string result = new helpers().WriteResultsToExcel(p.patientDataBase, p.excelTemplate, myExcelWorkbook);
             if(result != "")
             {
-                results.Text += result;
+                results.Inlines.Add(new LineBreak());
+                results.Inlines.Add(result);
+                results.Inlines.Add(new LineBreak());
                 resultsScroller.ScrollToBottom();
             }
         }
@@ -1279,7 +1381,9 @@ namespace doseStats
             string fileName = new helpers().WriteResultsText(p.patientDataBase, results.Text);
             if (fileName != "")
             {
-                results.Text += System.Environment.NewLine + String.Format("Results written to txt file: {0}", fileName.Substring(fileName.LastIndexOf("\\") + 1, fileName.Length - fileName.LastIndexOf("\\") - 1)) + System.Environment.NewLine;
+                results.Inlines.Add(new LineBreak());
+                results.Inlines.Add(String.Format("Results written to txt file: {0}", fileName.Substring(fileName.LastIndexOf("\\") + 1, fileName.Length - fileName.LastIndexOf("\\") - 1)));
+                results.Inlines.Add(new LineBreak());
                 resultsScroller.ScrollToBottom();
             }
         }

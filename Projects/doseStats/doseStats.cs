@@ -55,6 +55,8 @@ namespace VMS.TPS
             public Tuple<int, string> excelEBRTtotalDose;
             public Tuple<int, string> excelNeedleContr;
             public Tuple<int, string> excelNumNeedles;
+            //list to pimrary oncologist IDs
+            public Dictionary<string,string> physicianIDs;
 
             public void initialize()
             {
@@ -68,6 +70,7 @@ namespace VMS.TPS
                 EBRTnumFx = 27;
                 excelWriteFormat = "columnwise";
                 structures = new List<string> { "bladder", "bowel", "rectum", "sigmoid", "ctv", "pt A" };
+                physicianIDs = new Dictionary<string, string> { };
                 defaultStats = new List<Tuple<string, double, List<Tuple<string, double, VolumePresentation, DoseValuePresentation>>>>
                 {
                     new Tuple<string, double, List<Tuple<string, double, VolumePresentation, DoseValuePresentation>>>("bladder", 3.0, new List<Tuple<string, double, VolumePresentation, DoseValuePresentation>>{new Tuple<string, double, VolumePresentation, DoseValuePresentation>("Dose at Volume (Gy)", 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute) }),
@@ -147,6 +150,7 @@ namespace VMS.TPS
                         List<Tuple<string, string, double, string, int, string>> excelList_temp = new List<Tuple<string, string, double, string, int, string>> { };
                         List<Tuple<string, string, double, string, string, string>> aimsLimits_temp = new List<Tuple<string, string, double, string, string, string>> { };
                         List<string> structures_temp = new List<string> { };
+                        Dictionary<string,string> physicianID_temp = new Dictionary<string, string> { };
                         string line;
                         while ((line = reader.ReadLine()) != null)
                         {
@@ -204,6 +208,14 @@ namespace VMS.TPS
                                 {
                                     line = cropLine(line, "{");
                                     structures_temp.Add(line.Substring(0, line.IndexOf("}")));
+                                }
+                                else if(line.Contains("add physician id"))
+                                {
+                                    line = cropLine(line, "{");
+                                    string tmp = line.Substring(0, line.IndexOf(","));
+                                    line = cropLine(line, ",");
+                                    string tmp2 = line.Substring(0, line.IndexOf("}"));
+                                    physicianID_temp.Add(tmp,tmp2);
                                 }
                                 else if (line.Contains("add default statistic"))
                                 {
@@ -442,6 +454,11 @@ namespace VMS.TPS
                             p.structures.Clear();
                             p.structures = new List<string>(structures_temp);
                         }
+                        if(physicianID_temp.Any())
+                        {
+                            p.physicianIDs.Clear();
+                            p.physicianIDs = new Dictionary<string, string>(physicianID_temp);
+                        }
                     }
                 }
                 catch (Exception e) { MessageBox.Show(String.Format("Error could not load configuration file because: {0}\n\nAssuming default parameters", e.Message)); }
@@ -459,6 +476,5 @@ namespace VMS.TPS
         private string cropLine(string line, string cropChar) { return line.Substring(line.IndexOf(cropChar) + 1, line.Length - line.IndexOf(cropChar) - 1); }
 
         static public ScriptContext GetScriptContext() { return context; }
-
     }
 }

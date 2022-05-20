@@ -69,9 +69,8 @@ namespace doseStats
         public string WriteResultsToExcel(string patientDataBase, string filename, Excel.Workbook myExcelWorkbook)
         {
             string result = "";
-
             //get the patient folder. If a bad folder path was returned, close the spreadsheet. Make the user try again
-            string patientFolderPath = new helpers().getPatientFolder(patientDataBase);
+            string patientFolderPath = this.getPatientFolder(patientDataBase);
             if (patientFolderPath == "")
             {
                 myExcelWorkbook.Close(false);
@@ -97,7 +96,7 @@ namespace doseStats
                 CUI.button1.Text = "No";
                 CUI.ShowDialog();
                 if (CUI.confirm) System.Diagnostics.Process.Start(filePath);
-                result = System.Environment.NewLine + String.Format("Results written to excel file: {0}", filePath.Substring(filePath.LastIndexOf("\\") + 1, filePath.Length - filePath.LastIndexOf("\\") - 1)) + System.Environment.NewLine;
+                result = String.Format("Results written to excel file: {0}", filePath.Substring(filePath.LastIndexOf("\\") + 1, filePath.Length - filePath.LastIndexOf("\\") - 1));
             }
             catch (Exception exception)
             {
@@ -146,10 +145,10 @@ namespace doseStats
                                 CUI.button1.Text = "No";
                                 CUI.ShowDialog();
                                 if (CUI.confirm) System.Diagnostics.Process.Start(saveFileDialog1.FileName);
-                                result = System.Environment.NewLine + String.Format("Results written to excel file: {0}", filePath.Substring(filePath.LastIndexOf("\\") + 1, filePath.Length - filePath.LastIndexOf("\\") - 1)) + System.Environment.NewLine;
+                                result = String.Format("Results written to excel file: {0}", filePath.Substring(filePath.LastIndexOf("\\") + 1, filePath.Length - filePath.LastIndexOf("\\") - 1));
                             }
                             //something went wrong again. Reset the initial directory and excel file name and inform the user that they must try again
-                            catch (Exception exception2) { saveFileDialog1.InitialDirectory = patientFolderPath; saveFileDialog1.FileName = result; MessageBox.Show(String.Format("NOPE: {0}. \nTRY AGAIN", exception2.Message)); }
+                            catch (Exception exception2) { saveFileDialog1.InitialDirectory = patientFolderPath; saveFileDialog1.FileName = filePath; MessageBox.Show(String.Format("NOPE: {0}. \nTRY AGAIN", exception2.Message)); }
                         }
                         else
                         {
@@ -162,8 +161,45 @@ namespace doseStats
                 //the user does not want to write the results to another location. They would rather close the script, fix the problem, then try again.
                 else myExcelWorkbook.Close(false);
             }
-
             return result;
+        }
+
+        //helper method to determine if we are meeting the requested constraint
+        public bool checkIsMet(string aim, string limit, double HDR_EBRT_sum)
+        {
+            bool aimResult = false;
+            bool limitResult = false;
+            bool checkBoth = false;
+            if (aim != "" && limit != "") checkBoth = true;
+            if (aim != "")
+            {
+                if (aim.Substring(0, 1) == ">" && HDR_EBRT_sum > double.Parse(aim.Substring(1, 2))) aimResult = true;
+                else if (aim.Substring(0, 1) == "<" && HDR_EBRT_sum < double.Parse(aim.Substring(1, 2))) aimResult = true;
+                if (!checkBoth) return aimResult;
+            }
+            if (limit != "")
+            {
+                if (limit.Substring(0, 1) == ">" && HDR_EBRT_sum > double.Parse(limit.Substring(1, 2))) limitResult = true;
+                else if (limit.Substring(0, 1) == "<" && HDR_EBRT_sum < double.Parse(limit.Substring(1, 2))) limitResult = true;
+                if (!checkBoth) return limitResult;
+            }
+            //if the less than or greater than symbol is the same between the aim and limit, we just need to meet one of the limits for it to pass
+            if ((aim.Substring(0, 1) == limit.Substring(0, 1)) && (aimResult || limitResult)) return true;
+            //if the symbols are different between the aim and limit, we need to meet BOTH limits for it to pass
+            else if (aimResult && limitResult) return true;
+            else return false;
+        }
+
+        //helper method to retrieve the appropriate aim/limit for this particular structure & statistic
+        public Tuple<string, string> getAimLimit(VMS.TPS.Script.Parameters p, string structure, string statistic, double queryVal, string units)
+        {
+            string aim = "";
+            string limit = "";
+            Tuple<string, string, double, string, string, string> tmp;
+            if (statistic.Contains("Dmean") || statistic.Contains("Volume (cc)")) tmp = p.aimsLimits.FirstOrDefault(x => x.Item1 == structure && x.Item2 == statistic);
+            else tmp = p.aimsLimits.FirstOrDefault(x => x.Item1 == structure && x.Item2 == statistic && x.Item3 == queryVal && x.Item4 == units);
+            if (tmp != null) { aim = tmp.Item5; limit = tmp.Item6; }
+            return new Tuple<string,string>(aim, limit);
         }
     }
 }

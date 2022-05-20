@@ -1,0 +1,13 @@
+﻿<Window x:Class="doseStats.manualDoseAdjustment"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:doseStats"
+        mc:Ignorable="d"
+        Title="manualDoseAdjustment"
+        HorizontalAlignment="Center" SizeToContent="WidthAndHeight" Background="DarkGray" WindowStartupLocation="CenterScreen" >
+    <Grid>
+        <StackPanel Name="statsSP" Margin="10" VerticalAlignment="Top"></StackPanel>
+    </Grid>
+</Window>
