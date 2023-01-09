@@ -1,10 +1,11 @@
-5-20-2022
+1-9-2022
 
 Latest release: 
-doseStats_v0.7
+doseStats_v0.8
 
-Previous release:
-doseStats_v0.5beta
+Changes from 5-20-2022
+-revised structure of dose stats folder
+-fixed an issue in secondary dose calculation where the wrong activity is used for calculation on treatment approved plans (the activity should be the activity on the day of treatment approval)
 
 Changes from previous release:
 -version was incremented to 0.7 from 0.5 as I didn't push v0.6 to this repo (minor changes from v0.5 and forgot to do it). The current version in my clinic is v0.7
