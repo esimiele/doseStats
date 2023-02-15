@@ -320,7 +320,7 @@ namespace doseStats
         private void EBRTdosePerFxTB_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!double.TryParse(EBRTdosePerFxTB.Text, out double dummy)) EBRTRxDoseTB.Text = "";
-            else if (dummy <= 0.0)
+            else if (dummy < 0.0)
             {
                 MessageBox.Show("Error! The EBRT dose per fraction must be a number and non-negative!");
                 EBRTRxDoseTB.Text = "";
@@ -332,9 +332,9 @@ namespace doseStats
         private void EBRTnumFxTB_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!int.TryParse(EBRTnumFxTB.Text, out int dummy)) EBRTRxDoseTB.Text = "";
-            else if (dummy < 1)
+            else if (dummy < 0)
             {
-                MessageBox.Show("Error! The EBRT number of fractions must be a integer and >= 1!");
+                MessageBox.Show("Error! The EBRT number of fractions must be a integer and >= 0!");
                 EBRTRxDoseTB.Text = "";
             }
             else resetEBRTRxDose();
@@ -833,14 +833,15 @@ namespace doseStats
                         {
                             //create an empty vector to hold all structures retrieved from the plans that match the id in the requested statistics array
                             List<Structure> SOI = new List<Structure> { };
-                            if (!itr.Item1.Contains("ctv")) SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains(itr.Item1.ToLower()) && !x.IsEmpty).ToList();
-                            else
-                            {
-                                //special logic for the CTV structure because the CTV's will generally be labeled as ctv_mri<fraction number>
-                                SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains(String.Format("ctv_mri{0}", count+1)) && !x.IsEmpty).ToList();
-                                //there will be cases where the ctv will NOT be contoured on the MRI, in which case there will be no ctv_mri structure in the structure set. In this case grab all structures that contain 'ctv'
-                                if (SOI.Count == 0) SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains("ctv") && !x.IsEmpty).ToList();
-                            }
+                            SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains(itr.Item1.ToLower()) && !x.IsEmpty).ToList();
+                            //if (!itr.Item1.Contains("ctv")) SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains(itr.Item1.ToLower()) && !x.IsEmpty).ToList();
+                            //else
+                            //{
+                            //    //special logic for the CTV structure because the CTV's will generally be labeled as ctv_mri<fraction number>
+                            //    SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains(String.Format("ctv_mri{0}", count+1)) && !x.IsEmpty).ToList();
+                            //    //there will be cases where the ctv will NOT be contoured on the MRI, in which case there will be no ctv_mri structure in the structure set. In this case grab all structures that contain 'ctv'
+                            //    if (SOI.Count == 0) SOI = p.StructureSet.Structures.Where(x => x.Id.ToLower().Contains("ctv") && !x.IsEmpty).ToList();
+                            //}
                             if (SOI.Count > 0)
                             {
                                 //the retrieved list of structures is not empty
