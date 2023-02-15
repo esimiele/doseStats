@@ -10,8 +10,8 @@ using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.0.*")]
+//[assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -372,9 +372,9 @@ namespace VMS.TPS
                         }
                         
                         //verify the specified patient database and excel template files exist. NOTE: THIS CODE ASSUMES THE EXCELTEMPLATE RESIDES IN THE PATIENTDATABASE DIRECTORY
-                        if (!Directory.Exists(p.patientDataBase)) { MessageBox.Show("Error! Specified directory in configuration file does not exist!\nAssuming default directory!"); p.patientDataBase = ""; }
-                        if (p.patientDataBase == "" || !File.Exists(Path.Combine(p.patientDataBase, p.excelTemplate))) { MessageBox.Show("Error! Specified excel template in configuration file does not exist!\nAssuming default excel template!"); p.excelTemplate = ""; }
-                        if (p.documentation == "" || !File.Exists(p.documentation)) { MessageBox.Show("Warning! Specified help documentation file does not exist or can't be found!\nHelp PDF will not be accessable!"); p.documentation = ""; }
+                        //if (!Directory.Exists(p.patientDataBase)) { MessageBox.Show("Error! Specified directory in configuration file does not exist!\nAssuming default directory!"); p.patientDataBase = ""; }
+                        //if (p.patientDataBase == "" || !File.Exists(Path.Combine(p.patientDataBase, p.excelTemplate))) { MessageBox.Show("Error! Specified excel template in configuration file does not exist!\nAssuming default excel template!"); p.excelTemplate = ""; }
+                        //if (p.documentation == "" || !File.Exists(p.documentation)) { MessageBox.Show("Warning! Specified help documentation file does not exist or can't be found!\nHelp PDF will not be accessable!"); p.documentation = ""; }
 
                         //If there are any items in the default statistics list, we need to sort them alphabetically by the structure id and convert the array that can be used by the script.
                         //This code is almost a direct copy of the code in the calculateStatistics_Click method of the stats class

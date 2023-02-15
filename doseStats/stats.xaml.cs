@@ -57,7 +57,8 @@ namespace doseStats
         public bool formatError = false;
         //flag used to indicate if the ideal doses are shown
         bool isIdealDoses = false;
-
+        //scaling factor to account for it the user entered > 1 fraction in the plan properties
+        int scaleFactor;
 
         public stats(BrachyPlanSetup brachyPlan, VMS.TPS.Script.Parameters config)
         {
@@ -66,6 +67,7 @@ namespace doseStats
             //add new empty lists to the excel data lists (one for each requested statistic)
             for (int i = 0; i < p.excelStatistics.Count(); i++) excelData.Add(new List<double> { });
             plan = brachyPlan;
+            scaleFactor = (int)plan.NumberOfFractions;
             selectedSS = plan.StructureSet;
             //determine the number of BRACHY fractions from the primary reference point in the open plan in the current context. This method is required since there is no other information in the plan that identifies the number of fractions
             try { numFractions = (int)(plan.PrimaryReferencePoint.TotalDoseLimit / plan.PrimaryReferencePoint.SessionDoseLimit); }
@@ -904,7 +906,7 @@ namespace doseStats
                 //a dose is requested. Syntax: structure, requested value, volume presentation, doseValuePresentation
                 value = p.GetDoseAtVolume(s, itr.Item2, itr.Item3, itr.Item4).Dose;
                 //if we want the retrieved statistic to have units of Gy, we need to divide by 100 (our Eclipse install is configured so the default units on dose are cGy)
-                if (itr.Item4 == DoseValuePresentation.Absolute) value /= 100;
+                if (itr.Item4 == DoseValuePresentation.Absolute) value /= (100 * scaleFactor);
             }
             else if (itr.Item1.Contains("Volume at Dose"))
             {
@@ -936,7 +938,7 @@ namespace doseStats
                     }
                     value = meanPtADose / points.Count();
                     //convert mean dose (in cGy) to either Gy or a percent
-                    if (itr.Item4 == DoseValuePresentation.Absolute) value /= 100;
+                    if (itr.Item4 == DoseValuePresentation.Absolute) value /= (100 * scaleFactor);
                     else value *= 100.0 / p.TotalDose.Dose;
                 }
                 else
@@ -945,7 +947,7 @@ namespace doseStats
                     DVHData dvh = p.GetDVHCumulativeData(s, itr.Item4, VolumePresentation.Relative, 0.1);
                     if (dvh != null) value = dvh.MeanDose.Dose;
                     else value = 0.0;
-                    if (itr.Item4 == DoseValuePresentation.Absolute) value /= 100;
+                    if (itr.Item4 == DoseValuePresentation.Absolute) value /= (100 * scaleFactor);
                 }
             }
             //special case if the user just wants the volume of the structure in the given plan
