@@ -1,0 +1,91 @@
+﻿<Window x:Class="HDRPlanningAssistant.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HDRPlanningAssistant"
+        mc:Ignorable="d"
+        Title="MainWindow" HorizontalAlignment="Center" SizeToContent="WidthAndHeight"  Background="DarkGray">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="479*"/>
+            <ColumnDefinition Width="126*"/>
+            <ColumnDefinition Width="855*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="Help (Ctrl + H)" Grid.Column="0" HorizontalAlignment="Left" Height="20" Width="100" VerticalAlignment="Center" Margin="10,12,0,0" Click="OpenHelpClick"></Button>
+                <Label Content="Parameters" Grid.Column="1" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0"></Label>
+            </Grid>
+            <Grid Margin="0,10,0,0" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="EBRT Dose/fx (Gy):" Grid.Column="0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,0"></Label>
+                <TextBox x:Name="EBRTdosePerFxTB" Grid.Column="1" Width="40" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"  Margin="0,0,0,0" TextAlignment="Center" TextChanged="EBRTdosePerFxTBTextChanged"></TextBox>
+                <Label Content="EBRT num fx:" Grid.Column="2" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,0,0"></Label>
+                <TextBox x:Name="EBRTnumFxTB" Grid.Column="3" Width="40" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"  Margin="0,0,0,0" TextAlignment="Center" TextChanged="EBRTnumFxTBTextChanged"></TextBox>
+                <Label Content="EBRT Rx dose (Gy):" Grid.Column="4" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"  Margin="10,0,0,0"></Label>
+                <TextBox x:Name="EBRTRxDoseTB" Grid.Column="5" Width="40" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,0" TextAlignment="Center" IsReadOnly="True"></TextBox>
+            </Grid>
+
+            <Grid Margin="0,10,0,0" Width="600">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="Add DVH statistic" HorizontalAlignment="Center" Grid.Column="0" Width="110" Click="AddDVHMetricClick"/>
+                <Button Content="Add default DVH statistics" Grid.Column="1" Width="150" Click="AddDefaultMetricsClick" Margin="0,0,0,0"/>
+                <Button Content="Clear List" Grid.Column="2" Width="80" Click="ClearResultsClick"/>
+            </Grid>
+
+            <ScrollViewer x:Name="RequestedMetricsScroller" Height="451" Width="585" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <StackPanel Name="RequestedMetricsSP" Margin="5"></StackPanel>
+            </ScrollViewer>
+            <Button x:Name="calcStats" Content="Calculate statistics (Ctrl + E)" HorizontalAlignment="Center" Height="20" Width="160" Margin="0,0,0,10" Click="CalculateMetricsClick"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2">
+            <Label Content="Dose statistics" Grid.Column="3" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,5,0,0"></Label>
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="0.3*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Show Ideal Doses:" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,0"></Label>
+                <CheckBox x:Name="showIdealsCheckBox" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0" Checked="ShowIdealDoses" Unchecked="ShowIdealDoses"></CheckBox>
+                <Button x:Name="manualUpdateBtn" Grid.Column="2" Content="Manual Update (Ctrl + M)" VerticalAlignment="Center" HorizontalAlignment="Center" Width="145" Height="20" Margin="0,0,0,0" Click="ShowMDAWindow"></Button>
+                <Button Content="Shortcuts" Grid.Column="4" HorizontalAlignment="Center" Height="20" Width="70" VerticalAlignment="Center" Margin="0,0,0,0" Click="ShowShortcutsClick"></Button>
+            </Grid>
+
+            <ScrollViewer x:Name ="resultsScroller" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="845" Height="490" Margin="5" BorderBrush="Black" MouseDoubleClick="ShowMDAWindow" Grid.ColumnSpan="2">
+                <TextBlock x:Name="results" FontSize="12" FontFamily="Courier New" Width="825" Background="White"></TextBlock>
+            </ScrollViewer>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="writeTxt" Grid.Column="0" HorizontalAlignment="Center" Content="Write results to text file" Height="20" Width="140" Margin="0,0,0,0" VerticalAlignment="Center" Click="WriteResultsTextClick"/>
+                <Button x:Name="writeExcel" Grid.Column="1" Content="Write results to Excel (Ctrl + W)" HorizontalAlignment="Center" Height="20" Width="175" Margin="0,0,0,0" VerticalAlignment="Center" Click="WriteResultsExcelClick"/>
+                <Button x:Name="RunDoseCalc" Grid.Column="2" Content="Run dose calculation (Ctrl + D)" Width="170" Height="20" Margin="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Click="RunSecondCheckClick" Grid.ColumnSpan="2"></Button>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
