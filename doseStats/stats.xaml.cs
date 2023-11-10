@@ -18,6 +18,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using Structure = VMS.TPS.Common.Model.API.Structure;
 using StructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using Course = VMS.TPS.Common.Model.API.Course;
+using doseStats.Structs;
 //using AriaQ_v15;
 
 namespace doseStats
@@ -43,7 +44,7 @@ namespace doseStats
         //the data for each structure that will be written to the excel file. Unfortunately, I have to use this messy format since there is no structure to how the data is written to the excel file (except fraction # increases with column #)
         List<List<double>> excelData = new List<List<double>> { };
         //instance of the struct to copy the configuration parameters to the current class
-        VMS.TPS.Script.Parameters p;
+        Parameters p;
         //number of BRACHY fractions
         int numFractions;
         //external beam Rx dose
@@ -60,7 +61,7 @@ namespace doseStats
         //scaling factor to account for it the user entered > 1 fraction in the plan properties
         int scaleFactor;
 
-        public stats(BrachyPlanSetup brachyPlan, VMS.TPS.Script.Parameters config)
+        public stats(BrachyPlanSetup brachyPlan, Parameters config)
         {
             InitializeComponent();
             p = config;

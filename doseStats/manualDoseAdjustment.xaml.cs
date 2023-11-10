@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using doseStats.Structs;
 
 namespace doseStats
 {
@@ -26,11 +27,11 @@ namespace doseStats
         List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> stats = new List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> { };
         //a simplified list of the retrieved statistics so there is one row for each statistic (even if there are two statistics for the same structure)
         List<Tuple<string, double, string, double, string, List<double>>> simpleStatsList = new List<Tuple<string, double, string, double, string, List<double>>> { };
-        VMS.TPS.Script.Parameters p;
+        Parameters p;
         double tumorEBRTtotal = 0.0;
         double bladderEBRTtotal = 0.0, bowelEBRTtotal = 0.0, rectumEBRTtotal = 0.0, sigmoidEBRTtotal = 0.0;
 
-        public manualDoseAdjustment(int n, List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> data, VMS.TPS.Script.Parameters config)
+        public manualDoseAdjustment(int n, List<Tuple<string, double, List<Tuple<string, double, string, List<double>>>>> data, Parameters config)
         {
             InitializeComponent();
             //add a Ctrl+Q macro to make it easy to quit this window

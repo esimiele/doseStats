@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
+using doseStats.Structs;
 
 
 namespace doseStats
@@ -191,7 +192,7 @@ namespace doseStats
         }
 
         //helper method to retrieve the appropriate aim/limit for this particular structure & statistic
-        public Tuple<string, string> getAimLimit(VMS.TPS.Script.Parameters p, string structure, string statistic, double queryVal, string units)
+        public Tuple<string, string> getAimLimit(Parameters p, string structure, string statistic, double queryVal, string units)
         {
             string aim = "";
             string limit = "";

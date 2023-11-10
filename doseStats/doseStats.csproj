@@ -33,15 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AriaQ_v15">
-      <HintPath>..\AriaQ_v15\bin\Debug\AriaQ_v15.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -60,20 +51,20 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="VMS.TPS.Common.Model.API">
-      <HintPath>..\..\VMS_TPS_resources\v16\VMS.TPS.Common.Model.API.dll</HintPath>
+      <HintPath>..\..\VMS_TPS_resources\15.6\VMS.TPS.Common.Model.API.dll</HintPath>
     </Reference>
     <Reference Include="VMS.TPS.Common.Model.Types">
-      <HintPath>..\..\VMS_TPS_resources\v16\VMS.TPS.Common.Model.Types.dll</HintPath>
+      <HintPath>..\..\VMS_TPS_resources\15.6\VMS.TPS.Common.Model.Types.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="confirmUI.cs">
+    <Compile Include="Prompts\confirmUI.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="confirmUI.Designer.cs">
+    <Compile Include="Prompts\confirmUI.Designer.cs">
       <DependentUpon>confirmUI.cs</DependentUpon>
     </Compile>
     <Compile Include="doseCalc.xaml.cs">
@@ -89,15 +80,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="selectItem.cs">
+    <Compile Include="Prompts\selectItem.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="selectItem.Designer.cs">
+    <Compile Include="Prompts\selectItem.Designer.cs">
       <DependentUpon>selectItem.cs</DependentUpon>
     </Compile>
     <Compile Include="stats.xaml.cs">
       <DependentUpon>stats.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Structs\ConfigurationSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="doseCalc.xaml">
@@ -116,17 +108,17 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="_configuration\HDR_doseStats_config.ini" />
+    <None Include="Configuration\HDR_doseStats_config.ini" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="confirmUI.resx">
+    <EmbeddedResource Include="Prompts\confirmUI.resx">
       <DependentUpon>confirmUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="selectItem.resx">
+    <EmbeddedResource Include="Prompts\selectItem.resx">
       <DependentUpon>selectItem.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
@@ -135,14 +127,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Launcher\" />
+    <Folder Include="ResultsWriters\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-copy "$(ProjectDir)_configuration\*" "$(ProjectDir)$(OutDir)\configuration"</PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)Configuration\*" "$(ProjectDir)$(OutDir)\Configuration"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>if NOT EXIST "$(ProjectDir)$(OutDir)\configuration\" (
-mkdir "$(ProjectDir)$(OutDir)\configuration\"
+    <PreBuildEvent>if NOT EXIST "$(ProjectDir)$(OutDir)\Configuration\" (
+mkdir "$(ProjectDir)$(OutDir)\coCnfiguration\"
 )</PreBuildEvent>
   </PropertyGroup>
 </Project>
