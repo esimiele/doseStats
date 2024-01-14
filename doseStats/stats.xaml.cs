@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.IO;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using Excel = Microsoft.Office.Interop.Excel;
 using Structure = VMS.TPS.Common.Model.API.Structure;
 using StructureSet = VMS.TPS.Common.Model.API.StructureSet;
-using Course = VMS.TPS.Common.Model.API.Course;
 using doseStats.Structs;
+using System.Diagnostics;
 //using AriaQ_v15;
 
 namespace doseStats
@@ -51,8 +46,6 @@ namespace doseStats
         double EBRTRxDose;
         //this flag is used to signal if an added requested statistic is the first in the list (used for proper addition/remove of the header)
         bool firstStatStruct = true;
-        //this flag is used to signal if you want to assume or retrieve the dose from the external beam plan in the calculation of EQD2 (this option was removed from the GUI following Dr. Kidd's request)
-        bool assumeMaxEQD2 = true;
         int clearStatBtnCounter = 0;
         //this flag is used to signal if the plan Id's are in the correct format. Specifically, if the fourth character in the plan Id is NOT an integer, this flag is set to true indicating there was a problem
         public bool formatError = false;
@@ -146,39 +139,6 @@ namespace doseStats
         RoutedCommand openManualAdjustWindow = new RoutedCommand();
         RoutedCommand showHelpMacro = new RoutedCommand();
 
-        //removed per Dr. Kidd's request
-        private void toggleEQD2(object sender, EventArgs e)
-        {
-            if (assumeMaxEQD2_ckbox.IsChecked.Value) assumeMaxEQD2_ckbox.IsChecked = false;
-            else assumeMaxEQD2_ckbox.IsChecked = true;
-            updateAssumeEQD2Option();
-        }
-
-        //removed per Dr. Kidd's request
-        private void updateAssumeEQD2Option()
-        {
-            if (assumeMaxEQD2_ckbox.IsChecked.Value)
-            {
-                assumeMaxEQD2 = true;
-                EBRTdosePerFxTB.Text = String.Format("{0}", 1.8);
-                EBRTnumFxTB.Text = String.Format("{0}", 27);
-            }
-            else assumeMaxEQD2 = false;
-
-            //clear the existing vectors
-            statsResults.Clear();
-            //clear excel data vectors
-            for (int i = 0; i < excelData.Count; i++) excelData.ElementAt(i).Clear();
-            getStatsFromPlans();
-            updateStats();
-        }
-
-        //removed per Dr. Kidd's request
-        private void assumeMaxEQD2_ckbox_Click(object sender, RoutedEventArgs e)
-        {
-            //updateAssumeEQD2Option(); 
-        }
-
         //close the open dose statistics window. Called from the Ctrl + Q keyboard macro
         private void closeWindow(object sender, RoutedEventArgs e)
         {
@@ -201,7 +161,7 @@ namespace doseStats
         //open the documentation for this script (PDF file)
         private void openHelp_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(p.documentation);
+            Process.Start(p.documentation);
         }
 
         private void showMDAwindow(object sender, RoutedEventArgs e)
@@ -966,52 +926,10 @@ namespace doseStats
             double bladderEBRTtotal = 0.0, bowelEBRTtotal = 0.0, rectumEBRTtotal = 0.0, sigmoidEBRTtotal = 0.0;
             //plan, number of delivered fractions, tumor D2cc EQD2, bladder D2cc EQD2, bowel D2cc EQD2, rectum D2cc EQD2 (scaled for actual number of delivered fractions)
             List<Tuple<ExternalPlanSetup, int, double, double, double, double, double>> externalBeamResults = new List<Tuple<ExternalPlanSetup, int, double, double, double, double, double>> { };
-            //external beam plan, number of treated fractions
-            List<Tuple<ExternalPlanSetup, int>> ebPlans = new List<Tuple<ExternalPlanSetup, int>> { };
-            //retrieve the previous external beam plans if we don't want to assume the max EQD2. This will always evalute to false per Dr. Kidd's request
-            //if (!assumeMaxEQD2) ebPlans = getEBplans();
-            if (ebPlans.Any())
-            {
-                if (ebPlans.Count() > 1)
-                {
-                    //multiple EBRT plans found. Set the EBRT dose per fraction and EBRT number of fraction textboxes to 1.00 and 1, respectively
-                    EBRTdosePerFxTB.Text = String.Format("{0:0.00}", "1.00");
-                    EBRTnumFxTB.Text = "1";
-                }
-                else
-                {
-                    //one EBRT plan found, update the EBRT dose per fractio nand number of fractions and update the relevant text boxes
-                    p.EBRTdosePerFx = ebPlans.First().Item1.DosePerFraction.Dose / 100;
-                    p.EBRTnumFx = (int)ebPlans.First().Item1.NumberOfFractions;
-                    EBRTdosePerFxTB.Text = String.Format("{0:0.00}", p.EBRTdosePerFx);
-                    EBRTnumFxTB.Text = p.EBRTnumFx.ToString();
-                }
-
-                foreach (Tuple<ExternalPlanSetup, int> itr in ebPlans)
-                {
-                    //retrieve the physical dose delivered from each external beam plan for the target and OAR structures. All we care about here is the D2cc for each of the structures
-                    itr.Item1.DoseValuePresentation = DoseValuePresentation.Absolute;
-                    if (itr.Item1.StructureSet.Structures.FirstOrDefault(x => x.Id.ToLower() == "bladder") != null) bladderEBRTtotal = itr.Item1.GetDoseAtVolume(itr.Item1.StructureSet.Structures.First(x => x.Id.ToLower() == "bladder"), 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute).Dose / 100;
-                    if (itr.Item1.StructureSet.Structures.FirstOrDefault(x => x.Id.ToLower() == "bowel_bag") != null) bowelEBRTtotal = itr.Item1.GetDoseAtVolume(itr.Item1.StructureSet.Structures.First(x => x.Id.ToLower() == "bowel_bag"), 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute).Dose / 100;
-                    if (itr.Item1.StructureSet.Structures.FirstOrDefault(x => x.Id.ToLower() == "rectum") != null) rectumEBRTtotal = itr.Item1.GetDoseAtVolume(itr.Item1.StructureSet.Structures.First(x => x.Id.ToLower() == "rectum"), 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute).Dose / 100;
-                    if (itr.Item1.StructureSet.Structures.FirstOrDefault(x => x.Id.ToLower() == "sigmoid") != null) sigmoidEBRTtotal = itr.Item1.GetDoseAtVolume(itr.Item1.StructureSet.Structures.First(x => x.Id.ToLower() == "sigmoid"), 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute).Dose / 100;
-                    tumorEBRTtotal = itr.Item1.GetDoseAtVolume(itr.Item1.StructureSet.Structures.First(x => x.Id == itr.Item1.TargetVolumeID), 2.0, VolumePresentation.AbsoluteCm3, DoseValuePresentation.Absolute).Dose / 100;
-                    //EQD2 = (Dose from plan*(α/β + dose/fx)/(α/β + 2 Gy/fx))
-                    //calculate tumor and OAR total EQD2's. Assume alpha/beta ratios of 10 Gy and 3 Gy for the tumor and OAR, respectively
-                    externalBeamResults.Add(new Tuple<ExternalPlanSetup, int, double, double, double, double, double>(itr.Item1, itr.Item2,
-                        tumorEBRTtotal * ((double)(itr.Item2) / (double)itr.Item1.NumberOfFractions) * ((10.0 + (itr.Item1.DosePerFraction.Dose / 100)) / (10.0 + 2.0)),
-                        bladderEBRTtotal * ((double)(itr.Item2) / (double)itr.Item1.NumberOfFractions) * ((3.0 + (itr.Item1.DosePerFraction.Dose / 100)) / (3.0 + 2.0)),
-                        bowelEBRTtotal * ((double)(itr.Item2) / (double)itr.Item1.NumberOfFractions) * ((3.0 + (itr.Item1.DosePerFraction.Dose / 100)) / (3.0 + 2.0)),
-                        rectumEBRTtotal * ((double)(itr.Item2) / (double)itr.Item1.NumberOfFractions) * ((3.0 + (itr.Item1.DosePerFraction.Dose / 100)) / (3.0 + 2.0)),
-                        sigmoidEBRTtotal * ((double)(itr.Item2) / (double)itr.Item1.NumberOfFractions) * ((3.0 + (itr.Item1.DosePerFraction.Dose / 100)) / (3.0 + 2.0))));
-                }
-            }
-            else
-            {
-                //no external beam plan found or we want to assume the max EQD2. Assume alpha/beta ratios of 10 Gy and 3 Gy for the tumor and OAR, respectively
-                tumorEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 10) / (2.0 + 10.0);
-                bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = sigmoidEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 3.0) / (2.0 + 3.0);
-            }
+           
+            //no external beam plan found or we want to assume the max EQD2. Assume alpha/beta ratios of 10 Gy and 3 Gy for the tumor and OAR, respectively
+            tumorEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 10) / (2.0 + 10.0);
+            bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = sigmoidEBRTtotal = p.EBRTnumFx * p.EBRTdosePerFx * (p.EBRTdosePerFx + 3.0) / (2.0 + 3.0);
             //get the needle dwell time (i.e., not the Tandem, ovoids, VC, etc.) and the total dwell time for all applicators
             double needleDwellTime = getNeedleDwellTime(plan);
             double totalDwellTime = getDwellTime(plan.Catheters.ToList());
@@ -1038,32 +956,11 @@ namespace doseStats
             results.Text += "------------------------------------------------------------------------------------------------------------------" + System.Environment.NewLine;
 
             //EQD2 data
-            if (!ebPlans.Any())
-            {
-                //do not use external beam dose statistics for D2cc for the bowel, bladder, rectum, and tumor
-                if (!assumeMaxEQD2) results.Text += String.Format(" NO EXTERNAL BEAM PLAN FOUND! ASSUMING MAX EQD2 FOR TUMOR AND ALL OARs!") + System.Environment.NewLine;
-                results.Text += String.Format("{0,-34}", " EXTERNAL BEAM THERAPY:    ") + String.Format("{0,-19}", "Tumor    ") + String.Format("{0,-15}", "OAR") + System.Environment.NewLine;
-                results.Text += String.Format("     {0,-24}     ", String.Format("Fx Dose (Gy): {0:0.00}", p.EBRTdosePerFx)) + String.Format("{0,-15}", "EQD2 [α/β=10Gy]    ") + String.Format("{0,-15}", "EQD2 [α/β=3Gy]") + System.Environment.NewLine;
-                results.Text += String.Format("     {0,-24}     ", String.Format("Fx #: {0}", p.EBRTnumFx)) + String.Format("{0,-15:N1}    ", tumorEBRTtotal) + String.Format("{0,-15:N1}", bladderEBRTtotal) + System.Environment.NewLine;
-            }
-            else
-            {
-                //use external beam dose statistics for D2cc
-                tumorEBRTtotal = bladderEBRTtotal = bowelEBRTtotal = rectumEBRTtotal = 0.0;
-                results.Text += String.Format(" EXTERNAL BEAM PLAN DOSE CONTRIBUTIONS:") + System.Environment.NewLine;
-                results.Text += String.Format("{0,-35}", "                            ") + String.Format("{0,-19}", "Tumor    ") + String.Format("{0,-19}", "bladder") + String.Format("{0,-19}", "bowel") + String.Format("{0,-19}", "rectum") + System.Environment.NewLine;
-                results.Text += String.Format(" Plan Id    Fx Dose (Gy)  num Fx   ") + String.Format("{0,-15}", "EQD2 [α/β=10Gy]    ") + String.Format("{0,-15}", "EQD2 [α/β=3Gy]     ") + String.Format("{0,-15}", "EQD2 [α/β=3Gy]     ") + String.Format("{0,-15}", "EQD2 [α/β=3Gy]     ") + System.Environment.NewLine;
-                foreach (Tuple<ExternalPlanSetup, int, double, double, double, double, double> itr in externalBeamResults)
-                {
-                    results.Text += String.Format(" {0,-13} {1:0.00}       {2,-2}       ", itr.Item1.Id, itr.Item1.DosePerFraction.Dose / 100, itr.Item2) + String.Format("{0,-15:N1}    ", itr.Item3) + String.Format("{0,-15:N1}    ", itr.Item4) + String.Format("{0,-15:N1}    ", itr.Item5) + String.Format("{0,-15:N1}    ", itr.Item6) + System.Environment.NewLine;
-                    tumorEBRTtotal += itr.Item3;
-                    bladderEBRTtotal += itr.Item4;
-                    bowelEBRTtotal += itr.Item5;
-                    rectumEBRTtotal += itr.Item6;
-                    sigmoidEBRTtotal += itr.Item7;
-                }
-                if (ebPlans.Count() > 1) results.Text += String.Format("             TOTAL                 ") + String.Format("{0,-15:N1}    ", tumorEBRTtotal) + String.Format("{0,-15:N1}    ", bladderEBRTtotal) + String.Format("{0,-15:N1}    ", bowelEBRTtotal) + String.Format("{0,-15:N1}    ", rectumEBRTtotal) + System.Environment.NewLine;
-            }
+            //do not use external beam dose statistics for D2cc for the bowel, bladder, rectum, and tumor
+            results.Text += String.Format(" NO EXTERNAL BEAM PLAN FOUND! ASSUMING MAX EQD2 FOR TUMOR AND ALL OARs!") + System.Environment.NewLine;
+            results.Text += String.Format("{0,-34}", " EXTERNAL BEAM THERAPY:    ") + String.Format("{0,-19}", "Tumor    ") + String.Format("{0,-15}", "OAR") + System.Environment.NewLine;
+            results.Text += String.Format("     {0,-24}     ", String.Format("Fx Dose (Gy): {0:0.00}", p.EBRTdosePerFx)) + String.Format("{0,-15}", "EQD2 [α/β=10Gy]    ") + String.Format("{0,-15}", "EQD2 [α/β=3Gy]") + System.Environment.NewLine;
+            results.Text += String.Format("     {0,-24}     ", String.Format("Fx #: {0}", p.EBRTnumFx)) + String.Format("{0,-15:N1}    ", tumorEBRTtotal) + String.Format("{0,-15:N1}", bladderEBRTtotal) + System.Environment.NewLine;
             results.Text += "------------------------------------------------------------------------------------------------------------------" + System.Environment.NewLine + System.Environment.NewLine;
 
             //format the header output for the retrieved statistics (fraction number, HDR sum, etc. columnwise)

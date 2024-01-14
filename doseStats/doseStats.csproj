@@ -138,7 +138,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>if NOT EXIST "$(ProjectDir)$(OutDir)\Configuration\" (
-mkdir "$(ProjectDir)$(OutDir)\coCnfiguration\"
+mkdir "$(ProjectDir)$(OutDir)\Configuration\"
 )</PreBuildEvent>
   </PropertyGroup>
 </Project>

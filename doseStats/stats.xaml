@@ -35,8 +35,6 @@
         <Button x:Name="RunDoseCalc" Content="Run dose calculation (Ctrl + D)" Width="170" Height="20" Margin="0,0,60,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="runSecondCheck_Click" Grid.ColumnSpan="2"></Button>
 
         <Label Content="Parameters" FontSize="20" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,904.5,0"></Label>
-        <Label Content="Assume maximum EQD2 dose contribution from EBRT (Ctrl + A):" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,40,759.5,0" Visibility="Hidden"></Label>
-        <CheckBox x:Name="assumeMaxEQD2_ckbox" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,48,741.5,0" IsChecked="true" Click="assumeMaxEQD2_ckbox_Click" Visibility="Hidden"></CheckBox>
         <Label Content="EBRT Dose/fx (Gy):" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,73,1089.5,0"></Label>
         <TextBox x:Name="EBRTdosePerFxTB" Width="40" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,1048.5,0" TextAlignment="Center" TextChanged="EBRTdosePerFxTB_TextChanged"></TextBox>
         <Label Content="EBRT num fx:" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,73,923.5,0"></Label>
